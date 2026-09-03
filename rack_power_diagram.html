@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CESI rack power mapping — preliminary layout</title>
+<style>
+  :root {
+    --pdu1: #6ea8fe;
+    --pdu1-bg: #e7f0ff;
+    --pdu1-text: #1c4fa1;
+    --pdu2: #a98eda;
+    --pdu2-bg: #f0eaff;
+    --pdu2-text: #5b3fa0;
+    --strip: #f0a92e;
+    --strip-bg: #fff5e3;
+    --strip-text: #9a6206;
+    --inverter: #86c46b;
+    --inverter-bg: #eef7e8;
+    --inverter-text: #3f6f2a;
+    --ink: #1f2328;
+    --muted: #6a737d;
+    --line: #e3e6ea;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 32px 16px;
+    background: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+  }
+  .page {
+    max-width: 960px;
+    margin: 0 auto;
+    background: #f4f3ef;
+    border-radius: 10px;
+    padding: 28px 32px 36px;
+  }
+  h1 {
+    font-size: 22px;
+    margin: 0 0 6px;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0 0 18px;
+  }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    display: inline-block;
+  }
+  .dot.pdu1 { background: var(--pdu1); }
+  .dot.pdu2 { background: var(--pdu2); }
+  .dot.strip { background: var(--strip); }
+  .dot.inverter { background: var(--inverter); }
+
+  .card {
+    background: #ffffff;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+  }
+  .card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .card-head h2 {
+    font-size: 16px;
+    margin: 0;
+  }
+  .card-head .ip {
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+  h2.pdu1-title { color: var(--pdu1-text); }
+  h2.pdu2-title { color: var(--pdu2-text); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+  thead th {
+    text-align: left;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--line);
+  }
+  tbody td {
+    padding: 9px 8px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  td.slot {
+    width: 64px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .pdu1 td.slot { color: var(--pdu1-text); }
+  .pdu2 td.slot { color: var(--pdu2-text); }
+
+  .tag {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .tag.pdu1 { background: var(--pdu1-bg); color: var(--pdu1-text); }
+  .tag.pdu2 { background: var(--pdu2-bg); color: var(--pdu2-text); }
+  .tag.strip { background: var(--strip-bg); color: var(--strip-text); }
+  .tag.inverter { background: var(--inverter-bg); color: var(--inverter-text); }
+
+  .section-title {
+    font-size: 14px;
+    font-weight: 700;
+    margin: 24px 0 12px;
+  }
+
+  .panel {
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 14px;
+    border: 1px solid transparent;
+  }
+  .panel h3 {
+    margin: 0 0 2px;
+    font-size: 14.5px;
+  }
+  .panel .note {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin: 0 0 8px;
+  }
+  .panel ul {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 13.5px;
+  }
+  .panel li { margin: 3px 0; }
+  .panel.strip {
+    background: var(--strip-bg);
+    border-color: #f3d6a0;
+  }
+  .panel.strip h3 { color: var(--strip-text); }
+  .panel.inverter {
+    background: var(--inverter-bg);
+    border-color: #cbe3ba;
+  }
+  .panel.inverter h3 { color: var(--inverter-text); }
+
+  .conn {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 11.5px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .conn.pdu1 { background: var(--pdu1-bg); color: var(--pdu1-text); border: 1px solid #c6dbff; }
+  .conn.pdu2 { background: var(--pdu2-bg); color: var(--pdu2-text); border: 1px solid #dbcdf5; }
+  .conn.inverter { background: var(--inverter-bg); color: var(--inverter-text); border: 1px solid #cbe3ba; }
+
+  .footnote {
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin: 14px 0 0;
+  }
+
+  @media print {
+    body { padding: 0; }
+    .page { background: #fff; padding: 0; max-width: none; }
+    .card, .panel { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>CESI rack power mapping — preliminary layout</h1>
+  <p class="subtitle">View: looking from the back of the rack</p>
+
+  <div class="legend">
+    <span><i class="dot pdu1"></i>Right APC PDU1 — 192.168.90.244</span>
+    <span><i class="dot pdu2"></i>Left APC PDU2 — 192.168.90.245</span>
+    <span><i class="dot strip"></i>Rack power strip (on PDU2 slot 7)</span>
+    <span><i class="dot inverter"></i>EG4 6500EX-48 solar inverter (yellow side)</span>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="pdu1-title">Right APC PDU1</h2>
+      <span class="ip">192.168.90.244</span>
+    </div>
+    <table class="pdu1">
+      <thead>
+        <tr><th>Slot</th><th>Connected device</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="slot">9</td><td>U41 TP-Link managed switch 1</td></tr>
+        <tr><td class="slot">7</td><td>INT-SBS216-2 2U primary/secondary firewall <span class="tag pdu1">PSU 2</span></td></tr>
+        <tr><td class="slot">6</td><td>INT-SBS216-2 2U primary/secondary firewall <span class="tag pdu1">PSU 1</span></td></tr>
+        <tr><td class="slot">4</td><td>multi-bhyve/store02 4U server <span class="tag pdu1">PSU 2</span></td></tr>
+        <tr><td class="slot">1</td><td>cesi-bhyve01 2U server <span class="tag pdu1">PSU 1</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="pdu2-title">Left APC PDU2</h2>
+      <span class="ip">192.168.90.245</span>
+    </div>
+    <table class="pdu2">
+      <thead>
+        <tr><th>Slot</th><th>Connected device</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="slot">10</td><td>TP-Link 48-port switch 2</td></tr>
+        <tr><td class="slot">8</td><td>Cradlepoint E320 router</td></tr>
+        <tr><td class="slot">7</td><td>Rack power strip <span class="tag strip">feeds strip →</span></td></tr>
+        <tr><td class="slot">6</td><td>Netgear 5-port switch</td></tr>
+        <tr><td class="slot">5</td><td>multi-bhyve/store03 4U server <span class="tag pdu2">PSU 2, bottom PSU</span></td></tr>
+        <tr><td class="slot">2</td><td>cesi-bhyve01 2U server <span class="tag pdu2">PSU 2, bottom PSU</span></td></tr>
+        <tr><td class="slot">1</td><td>Verizon modem</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-title">Downstream power sources</div>
+
+  <div class="panel strip">
+    <h3>Yellow-side power strip</h3>
+    <p class="note">Powered from Left PDU2 — slot 7</p>
+    <ul>
+      <li>U40 TP-Link 48-port switch 1</li>
+    </ul>
+  </div>
+
+  <div class="panel inverter">
+    <h3>EG4 6500EX-48 solar inverter</h3>
+    <p class="note">Independent power source — not on either PDU</p>
+    <ul>
+      <li>multi-bhyve/store03 4U server — PSU 1, top PSU</li>
+      <li>multi-bhyve/store02 4U server — PSU 1, top PSU</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2>Server power summary</h2>
+    </div>
+    <table>
+      <thead>
+        <tr><th>Server</th><th>PSU 1 connection</th><th>PSU 2 connection</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>INT-SBS216-2 2U firewall</td>
+          <td><span class="conn pdu1">PDU1 · slot 6</span></td>
+          <td><span class="conn pdu1">PDU1 · slot 7</span></td>
+        </tr>
+        <tr>
+          <td>cesi-bhyve01 2U server</td>
+          <td><span class="conn pdu1">PDU1 · slot 1</span></td>
+          <td><span class="conn pdu2">PDU2 · slot 2</span></td>
+        </tr>
+        <tr>
+          <td>multi-bhyve/store02 4U server</td>
+          <td><span class="conn inverter">Yellow-side inverter</span></td>
+          <td><span class="conn pdu1">PDU1 · slot 4</span></td>
+        </tr>
+        <tr>
+          <td>multi-bhyve/store03 4U server</td>
+          <td><span class="conn inverter">Yellow-side inverter</span></td>
+          <td><span class="conn pdu2">PDU2 · slot 5</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="footnote">Note: only the firewall has both PSUs on the same PDU (PDU1). Both bhyve servers and both 4U storage servers split their PSUs across two independent power sources, so a single PDU or inverter failure won't take a fully redundant server down.</p>
+  </div>
+</div>
+</body>
+</html>
